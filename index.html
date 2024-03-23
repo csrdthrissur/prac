@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css"><link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
+        <link rel="stylesheet" href="css/filter.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script><script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="js/tailDT.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/Bridge_1.js"></script>
+        <script src="data/PMGSYRoad_2.js"></script>
+        <script src="data/PublicLand_3.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        }).fitBounds([[9.581491075816162,76.48247005344855],[9.754596017667602,76.76095325068452]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        document.querySelector(".leaflet-popup-pane").addEventListener("load", function(event) {
+          var tagName = event.target.tagName,
+            popup = map._popup;
+          // Also check if flag is already set.
+          if (tagName === "IMG" && popup && !popup._updated) {
+            popup._updated = true; // Set flag to prevent looping.
+            popup.update();
+          }
+        }, true);
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_GoogleSatellite_0');
+        map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_GoogleSatellite_0;
+        map.addLayer(layer_GoogleSatellite_0);
+        function pop_Bridge_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Ward</th>\
+                        <td>' + (feature.properties['Ward'] !== null ? autolinker.link(feature.properties['Ward'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">bridge_nam</th>\
+                        <td>' + (feature.properties['bridge_nam'] !== null ? autolinker.link(feature.properties['bridge_nam'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_Bridge_1_0() {
+            return {
+                pane: 'pane_Bridge_1',
+                radius: 4.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(232,113,141,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Bridge_1');
+        map.getPane('pane_Bridge_1').style.zIndex = 401;
+        map.getPane('pane_Bridge_1').style['mix-blend-mode'] = 'normal';
+        var layer_Bridge_1 = new L.geoJson(json_Bridge_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Bridge_1',
+            layerName: 'layer_Bridge_1',
+            pane: 'pane_Bridge_1',
+            onEachFeature: pop_Bridge_1,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_Bridge_1_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_Bridge_1);
+        map.addLayer(layer_Bridge_1);
+        function pop_PMGSYRoad_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Name</th>\
+                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Shape_Leng</th>\
+                        <td>' + (feature.properties['Shape_Leng'] !== null ? autolinker.link(feature.properties['Shape_Leng'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_PMGSYRoad_2_0() {
+            return {
+                pane: 'pane_PMGSYRoad_2',
+                opacity: 1,
+                color: 'rgba(183,72,75,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_PMGSYRoad_2');
+        map.getPane('pane_PMGSYRoad_2').style.zIndex = 402;
+        map.getPane('pane_PMGSYRoad_2').style['mix-blend-mode'] = 'normal';
+        var layer_PMGSYRoad_2 = new L.geoJson(json_PMGSYRoad_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PMGSYRoad_2',
+            layerName: 'layer_PMGSYRoad_2',
+            pane: 'pane_PMGSYRoad_2',
+            onEachFeature: pop_PMGSYRoad_2,
+            style: style_PMGSYRoad_2_0,
+        });
+        bounds_group.addLayer(layer_PMGSYRoad_2);
+        map.addLayer(layer_PMGSYRoad_2);
+        function pop_PublicLand_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">LandArea</th>\
+                        <td>' + (feature.properties['LandArea'] !== null ? autolinker.link(feature.properties['LandArea'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Name</th>\
+                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(feature.properties['Name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Code</th>\
+                        <td>' + (feature.properties['Code'] !== null ? autolinker.link(feature.properties['Code'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Ward</th>\
+                        <td>' + (feature.properties['Ward'] !== null ? autolinker.link(feature.properties['Ward'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">RoadAccess</th>\
+                        <td>' + (feature.properties['RoadAccess'] !== null ? autolinker.link(feature.properties['RoadAccess'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var updatedContent = removeEmptyRowsFromPopupContent(content, feature);
+            popup.setContent(updatedContent);
+        }
+
+        function style_PublicLand_3_0() {
+            return {
+                pane: 'pane_PublicLand_3',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(152,125,183,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_PublicLand_3');
+        map.getPane('pane_PublicLand_3').style.zIndex = 403;
+        map.getPane('pane_PublicLand_3').style['mix-blend-mode'] = 'normal';
+        var layer_PublicLand_3 = new L.geoJson(json_PublicLand_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PublicLand_3',
+            layerName: 'layer_PublicLand_3',
+            pane: 'pane_PublicLand_3',
+            onEachFeature: pop_PublicLand_3,
+            style: style_PublicLand_3_0,
+        });
+        bounds_group.addLayer(layer_PublicLand_3);
+        map.addLayer(layer_PublicLand_3);
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'<img src="legend/PublicLand_3.png" /> Public Land': layer_PublicLand_3,'<img src="legend/PMGSYRoad_2.png" /> PMGSY Road': layer_PMGSYRoad_2,'<img src="legend/Bridge_1.png" /> Bridge': layer_Bridge_1,"Google Satellite": layer_GoogleSatellite_0,}).addTo(map);
+        setBounds();
+        map.addControl(new L.Control.Search({
+            layer: layer_PublicLand_3,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'Ward'}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"Code": "str"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Code = document.createElement('div');
+            div_Code.id = "div_Code";
+            div_Code.className= "filterselect";
+            document.getElementById("menu").appendChild(div_Code);
+            sel_Code = document.createElement('select');
+            sel_Code.multiple = true;
+            sel_Code.size = 10;
+            sel_Code.id = "sel_Code";
+            var Code_options_str = "<option value='' unselected></option>";
+            sel_Code.onchange = function(){filterFunc()};
+            Code_options_str  += '<option value="W10B2">W10B2</option>';
+            Code_options_str  += '<option value="W11B4">W11B4</option>';
+            Code_options_str  += '<option value="W12B1">W12B1</option>';
+            Code_options_str  += '<option value="W13B1">W13B1</option>';
+            Code_options_str  += '<option value="W14B1">W14B1</option>';
+            Code_options_str  += '<option value="W1B3">W1B3</option>';
+            Code_options_str  += '<option value="W2B1">W2B1</option>';
+            Code_options_str  += '<option value="W2B2">W2B2</option>';
+            Code_options_str  += '<option value="W3B1">W3B1</option>';
+            Code_options_str  += '<option value="W3B2">W3B2</option>';
+            Code_options_str  += '<option value="W5B1">W5B1</option>';
+            Code_options_str  += '<option value="W6B1">W6B1</option>';
+            Code_options_str  += '<option value="W6B2">W6B2</option>';
+            Code_options_str  += '<option value="W8B1">W8B1</option>';
+            Code_options_str  += '<option value="W8B2">W8B2</option>';
+            Code_options_str  += '<option value="W8B3">W8B3</option>';
+            Code_options_str  += '<option value="W9B1">W9B1</option>';
+            Code_options_str  += '<option value="W9B2">W9B2</option>';
+            sel_Code.innerHTML = Code_options_str;
+            div_Code.appendChild(sel_Code);
+            var lab_Code = document.createElement('div');
+            lab_Code.innerHTML = 'Code';
+            lab_Code.className = 'filterlabel';
+            div_Code.appendChild(lab_Code);
+            var reset_Code = document.createElement('div');
+            reset_Code.innerHTML = 'clear filter';
+            reset_Code.className = 'filterlabel';
+            reset_Code.onclick = function() {
+                var options = document.getElementById("sel_Code").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_Code.appendChild(reset_Code);
+			
+			// Function to handle adding point data to the map
+function addPointToMap(latlng) {
+    // Display a confirmation dialog box
+    var result = confirm('Do you want to add a point at this location?');
+
+    // Check the user's response
+    if (result) {
+        // If the user clicks "OK," add the point to the map
+        var newPoint = {
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [latlng.lng, latlng.lat] // Leaflet uses [lng, lat] order
+            },
+            properties: {
+                // You can prompt the user for additional attributes if needed
+            }
+        };
+
+        // Add the new point as a GeoJSON layer to the map
+        var marker = L.geoJSON(newPoint, {
+            // Customize the marker appearance if needed
+            pointToLayer: function(feature, latlng) {
+                return L.marker(latlng);
+            }
+        }).addTo(map);
+
+        // Store the added point's coordinates in localStorage
+        var savedPoints = JSON.parse(localStorage.getItem('savedPoints')) || [];
+        savedPoints.push(newPoint.geometry.coordinates);
+        localStorage.setItem('savedPoints', JSON.stringify(savedPoints));
+
+        // Bind click event to the marker for deletion
+        marker.on('click', function() {
+            // Confirm deletion
+            var deleteConfirmation = confirm('Are you sure you want to delete this point?');
+            if (deleteConfirmation) {
+                // Remove the marker from the map
+                map.removeLayer(marker);
+
+                // Remove the deleted point's coordinates from localStorage
+                var updatedPoints = savedPoints.filter(function(point) {
+                    return !arraysAreEqual(point, newPoint.geometry.coordinates);
+                });
+                localStorage.setItem('savedPoints', JSON.stringify(updatedPoints));
+
+                // Provide feedback to the user
+                alert('Point deleted from the map.');
+            }
+        });
+
+        // Provide feedback to the user
+        alert('Point added to the map!');
+    } else {
+        // If the user clicks "Cancel," do nothing
+        // You can optionally provide feedback to the user
+        alert('Point addition canceled.');
+    }
+}
+
+// Function to compare arrays (for deletion)
+function arraysAreEqual(arr1, arr2) {
+    return JSON.stringify(arr1) === JSON.stringify(arr2);
+}
+
+// Function to load saved points from localStorage
+function loadSavedPoints() {
+    var savedPoints = JSON.parse(localStorage.getItem('savedPoints')) || [];
+    savedPoints.forEach(function(point) {
+        // Add each saved point as a marker to the map
+        var marker = L.marker([point[1], point[0]]).addTo(map);
+
+        // Add a delete button to the marker
+        var deleteButton = document.createElement('button');
+        deleteButton.innerHTML = 'Delete';
+        deleteButton.onclick = function() {
+            // Confirm deletion
+            var deleteConfirmation = confirm('Are you sure you want to delete this point?');
+            if (deleteConfirmation) {
+                // Remove the marker from the map
+                map.removeLayer(marker);
+
+                // Remove the deleted point's coordinates from localStorage
+                var updatedPoints = savedPoints.filter(function(savedPoint) {
+                    return !arraysAreEqual(savedPoint, point);
+                });
+                localStorage.setItem('savedPoints', JSON.stringify(updatedPoints));
+
+                // Provide feedback to the user
+                alert('Point deleted from the map.');
+            }
+        };
+
+        // Append the delete button to the marker's popup
+        var popupContent = document.createElement('div');
+        popupContent.appendChild(deleteButton);
+        marker.bindPopup(popupContent);
+    });
+}
+
+// Event listener for map clicks
+map.on('click', function(e) {
+    // Call the function to add point data to the map
+    addPointToMap(e.latlng);
+});
+
+// Load saved points when the page loads
+loadSavedPoints();
+        </script>
+    </body>
+</html>
